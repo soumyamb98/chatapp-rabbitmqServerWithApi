@@ -23,8 +23,7 @@ amqp.connect('amqp://localhost', function(error, connection) {
 
     channel.consume(queue, function(msg) {
         let secs = msg.content.toString().split('.').length - 1;
-        console.log(msg.content.toString().split('.').length, "msg.content.toString().split('.').length");
-        console.log(msg.content.toString().split('.'), "msg.content.toString().split('.')");
+        
         console.log(msg,"msg");
         console.log(msg.content, "msg.content");
         console.log(msg.content.toString(), "msg.content.toString()");
