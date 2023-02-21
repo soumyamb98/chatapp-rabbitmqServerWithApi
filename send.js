@@ -1,3 +1,27 @@
+const express = require('express');
+const index= new express();
+
+
+const port = process.env.PORT || 5000;
+index.use(express.json());
+
+
+index.post('/messages', (req, res) => {
+    let routingkey = req.body.logtype; 
+    let message = req.body.message;
+    let dateTime = req.body.dateTime;
+
+//     res.send();
+// })
+
+
+
+
+
+
+
+
+
 const amqp = require('amqplib/callback_api');
 // create connection
 amqp.connect('amqp://localhost', function(error, connection) {
@@ -9,24 +33,42 @@ amqp.connect('amqp://localhost', function(error, connection) {
         if (error) {
             throw error;
         }
+        let exchange = 'logs';
 
-        let queue = 'hello';
-        let msg = process.argv.slice(2).join(' ') || "Hello World!"
-        console.log(process.argv.slice(2), "process.argv.slice(2)");
-        console.log(process.argv.slice(2).join(' '), "process.argv.slice(2).join(' ')");
-        // create/assert queue
-        channel.assertQueue(queue, {
+        channel.assertExchange(exchange, 'fanout', {
             durable: true
-        });
-        // sending msg to queue
-        channel.sendToQueue(queue, Buffer.from(msg),{
-            persistent: true
-        });
+          });
 
-        console.log(`sent ${msg}`  );
+
+
+        const details = {
+            logtype: routingkey,
+            message : message,
+            dateTime: dateTime
+        }
+        channel.publish(exchange, routingkey, Buffer.from(JSON.stringify(details)),{
+            persistent: true 
+        });
+        console.log(`sent ${routingkey} log is sent to exchange ${exchange} details: ${details}`  );
     });
-    setTimeout(function() {
-        connection.close();
-        process.exit(0);
-    }, 500);
+    // setTimeout(function() {
+        // connection.close();
+        // process.exit(0);
+    // }, 500);
 });
+
+
+res.send();
+})
+
+
+
+
+
+
+
+
+
+index.listen(port, function() {
+    console.log(`listening on ${port}`)
+})
